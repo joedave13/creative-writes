@@ -2,9 +2,16 @@ import { auth, db } from '../utils/firebase';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
-import { collection, onSnapshot, query, where } from 'firebase/firestore';
+import {
+    collection,
+    deleteDoc,
+    doc,
+    onSnapshot,
+    query,
+    where,
+} from 'firebase/firestore';
 import { BsTrash2Fill } from 'react-icons/bs';
-import { AiFillEdit } from 'react-icons/ai';
+import { AiFillEdit, AiOutlineLogout } from 'react-icons/ai';
 import Head from 'next/head';
 import Post from '../components/post';
 
@@ -28,6 +35,11 @@ export default function Dashboard() {
         return unsubscribe;
     };
 
+    const deletePost = async (id) => {
+        const docRef = doc(db, 'posts', id);
+        await deleteDoc(docRef);
+    };
+
     useEffect(() => {
         getData();
     }, [user, loading]);
@@ -46,7 +58,10 @@ export default function Dashboard() {
                                 <AiFillEdit className='text-2xl' />
                                 Edit
                             </button>
-                            <button className='text-pink-600 flex items-center justify-center gap-2 py-2 text-sm'>
+                            <button
+                                onClick={() => deletePost(post.id)}
+                                className='text-pink-600 flex items-center justify-center gap-2 py-2 text-sm'
+                            >
                                 <BsTrash2Fill className='text-2xl' />
                                 Delete
                             </button>
@@ -55,9 +70,10 @@ export default function Dashboard() {
                 ))}
             </div>
             <button
-                className='font-medium text-white bg-gray-800 py-2 px-4 rounded-lg my-6'
+                className='font-medium text-white bg-gray-800 py-2 px-4 rounded-lg my-6 flex items-center justify-center gap-2 text-sm'
                 onClick={() => auth.signOut()}
             >
+                <AiOutlineLogout className='text-2xl' />
                 Sign Out
             </button>
         </div>
