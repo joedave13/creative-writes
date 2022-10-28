@@ -1,5 +1,6 @@
 import { collection, onSnapshot, orderBy, query } from 'firebase/firestore';
 import Head from 'next/head';
+import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import Post from '../components/post';
 import { db } from '../utils/firebase';
@@ -34,7 +35,21 @@ export default function Home() {
                 <h2>See what other people are saying</h2>
 
                 {posts.map((post) => (
-                    <Post key={post.id} {...post}></Post>
+                    <Post key={post.id} {...post}>
+                        <Link
+                            href={{
+                                pathname: `/${post.id}`,
+                                query: { ...post },
+                            }}
+                        >
+                            <button>
+                                {post.comments?.length > 0
+                                    ? post.comments?.length
+                                    : 0}{' '}
+                                comments
+                            </button>
+                        </Link>
+                    </Post>
                 ))}
             </div>
         </div>
