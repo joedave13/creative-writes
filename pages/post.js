@@ -43,6 +43,11 @@ export default function Post() {
             const updatedPost = { ...post, timestamp: serverTimestamp() };
             await updateDoc(docRef, updatedPost);
 
+            toast.success('Post has been updated ✏️✏️', {
+                position: toast.POSITION.TOP_CENTER,
+                autoClose: 1500,
+            });
+
             return route.push('/');
         } else {
             const collectionRef = collection(db, 'posts');
@@ -56,6 +61,11 @@ export default function Post() {
             });
 
             setPost({ description: '' });
+
+            toast.success('Post has been made 🚀🚀🚀', {
+                position: toast.POSITION.TOP_CENTER,
+                autoClose: 1500,
+            });
 
             return route.push('/');
         }
