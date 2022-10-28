@@ -14,6 +14,7 @@ import { BsTrash2Fill } from 'react-icons/bs';
 import { AiFillEdit, AiOutlineLogout } from 'react-icons/ai';
 import Head from 'next/head';
 import Post from '../components/post';
+import Link from 'next/link';
 
 export default function Dashboard() {
     const route = useRouter();
@@ -54,10 +55,12 @@ export default function Dashboard() {
                 {posts.map((post) => (
                     <Post key={post.id} {...post}>
                         <div className='flex gap-4'>
-                            <button className='text-teal-600 flex items-center justify-center gap-2 py-2 text-sm'>
-                                <AiFillEdit className='text-2xl' />
-                                Edit
-                            </button>
+                            <Link href={{ pathname: '/post', query: post }}>
+                                <button className='text-teal-600 flex items-center justify-center gap-2 py-2 text-sm'>
+                                    <AiFillEdit className='text-2xl' />
+                                    Edit
+                                </button>
+                            </Link>
                             <button
                                 onClick={() => deletePost(post.id)}
                                 className='text-pink-600 flex items-center justify-center gap-2 py-2 text-sm'

@@ -1,8 +1,14 @@
 import { auth, db } from '../utils/firebase';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import Head from 'next/head';
-import { useState } from 'react';
-import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
+import { useEffect, useState } from 'react';
+import {
+    addDoc,
+    collection,
+    doc,
+    serverTimestamp,
+    updateDoc,
+} from 'firebase/firestore';
 import { useRouter } from 'next/router';
 import { toast } from 'react-toastify';
 
@@ -10,6 +16,8 @@ export default function Post() {
     const [post, setPost] = useState({ description: '' });
     const [user, loading] = useAuthState(auth);
     const route = useRouter();
+    const routeData = route.query;
+    console.log(routeData);
 
     const submitPost = async (e) => {
         e.preventDefault();
@@ -30,20 +38,41 @@ export default function Post() {
             return;
         }
 
-        const collectionRef = collection(db, 'posts');
+        if (post?.hasOwnProperty('id')) {
+            const docRef = doc(db, 'posts', post.id);
+            const updatedPost = { ...post, timestamp: serverTimestamp() };
+            await updateDoc(docRef, updatedPost);
 
-        await addDoc(collectionRef, {
-            ...post,
-            timestamp: serverTimestamp(),
-            user: user.uid,
-            avatar: user.photoURL,
-            username: user.displayName,
-        });
+            return route.push('/');
+        } else {
+            const collectionRef = collection(db, 'posts');
 
-        setPost({ description: '' });
+            await addDoc(collectionRef, {
+                ...post,
+                timestamp: serverTimestamp(),
+                user: user.uid,
+                avatar: user.photoURL,
+                username: user.displayName,
+            });
 
-        return route.push('/');
+            setPost({ description: '' });
+
+            return route.push('/');
+        }
     };
+
+    const checkUser = async () => {
+        if (loading) return;
+        if (!user) return route.push('/auth/login');
+
+        if (routeData.id) {
+            setPost({ description: routeData.description, id: routeData.id });
+        }
+    };
+
+    useEffect(() => {
+        checkUser();
+    }, [user, loading]);
 
     return (
         <>
@@ -52,7 +81,11 @@ export default function Post() {
             </Head>
             <div className='my-12 p-12 shadow-lg rounded-lg max-w-md mx-auto'>
                 <form onSubmit={submitPost}>
-                    <h1 className='text-2xl font-bold'>Create a New Post</h1>
+                    <h1 className='text-2xl font-bold'>
+                        {post.hasOwnProperty('id')
+                            ? 'Edit Your Post'
+                            : 'Create a New Post'}
+                    </h1>
 
                     <div className='py-2'>
                         <h3 className='text-lg font-medium py-2'>
