@@ -13,12 +13,14 @@ import {
     Timestamp,
     updateDoc,
 } from 'firebase/firestore';
+import { useAuthState } from 'react-firebase-hooks/auth';
 
 export default function Details() {
     const router = useRouter();
     const routeData = router.query;
     const [comment, setComment] = useState('');
     const [comments, setComments] = useState([]);
+    const [user, loading] = useAuthState(auth);
 
     const submitComment = async () => {
         if (!auth.currentUser) return router.push('/auth/login');
@@ -50,6 +52,9 @@ export default function Details() {
     };
 
     const getComments = async () => {
+        if (loading) return;
+        if (!user) return router.push('/auth/login');
+
         const docRef = doc(db, 'posts', routeData.id);
         const unsubscribe = onSnapshot(docRef, (snapshot) => {
             setComments(snapshot.data().comments);
@@ -60,7 +65,7 @@ export default function Details() {
     useEffect(() => {
         if (!router.isReady) return;
         getComments();
-    }, [router.isReady]);
+    }, [router.isReady, user, loading]);
 
     return (
         <div>
